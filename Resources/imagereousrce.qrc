@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/Resources">
+        <file>play.png</file>
+        <file>skip_backward.png</file>
+        <file>ward.png</file>
+        <file>search.png</file>
+        <file>list_expand.png</file>
+        <file>pause.png</file>
+        <file>doc_search.png</file>
+        <file>Logo.png</file>
+    </qresource>
+</RCC>
