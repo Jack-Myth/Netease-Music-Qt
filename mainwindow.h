@@ -3,6 +3,7 @@
 
 #include "mystruct.h"
 #include "lrcparser.h"
+#include <qt_windows.h>
 #include <QMainWindow>
 #include <QMediaPlayer>
 #include <QtNetwork/QtNetwork>
@@ -28,6 +29,9 @@ public:
     QVector<MusicInfomation> GetMusicInfolist();
     void PlayNext();
     void PlayPre();
+protected:
+    friend LRESULT CALLBACK MainWindow_MyWndProc(HWND wnd,UINT message,WPARAM wParam,LPARAM lParam);
+    WNDPROC SuperWndProc;
 private slots:
 
     void on_SearchWindowButton_clicked();
@@ -46,6 +50,12 @@ private slots:
 
     void on_Share_Button_clicked();
 
+    void on_CommentWindowButton_clicked();
+
+    void on_SettingWindowButton_clicked();
+
+signals:
+    void WindowMoved();
 private:
     MusicInfomation CurrentMusicInfo={0};
     int CurrentMusic=-1;
@@ -54,13 +64,20 @@ private:
     QMediaPlayer* MusicPlayerCore;
     LRCParser LRCParserInstance;
     class QNetworkAccessManager* NetworkM;
+    class QNetworkAccessManager* NetworkMusic;
+    //class QNetworkReply* MusicReply;
     bool SliderPressing=false;
+    LRCParser::LyricType LyricToShow=LRCParser::LyricType::Mixed;
     void onMusicPlayerStateChanged(QMediaPlayer::State state);
     void onMusicPlayerPositionChanged(qint64 position);
     void onMusicPlayerMediaChanged(const QMediaContent &media);
     void onPlaylistCurrentIndexChanged(int CurIndex);
     void __CheckAndPlayMusic(MusicInfomation MusicToPlay);
     void __UpdatePlaylist();
+    void onLyricSettingChanged();
+    //LRESULT MyWndProc(HWND wnd, UINT message, WPARAM wParam, LPARAM lParam);
+    void onWindowMoved();
+    void onBufferStateChanged(int percentFilled);
 };
 
 #endif // MAINWINDOW_H

@@ -335,14 +335,23 @@
       <height>25</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QSlider::groove:horizontal {
+    height: 3px;
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(100, 100, 100, 255), stop:0 rgba(100, 100, 100, 255), stop:0 rgba(255, 255, 255, 255), stop:1 rgba(255, 255, 255, 255));
+}
+QSlider::handle:horizontal {
+        width: 10px;
+        background: rgb(0, 160, 230);
+        margin: -6px 0px -6px 0px;
+        border-radius: 9px;
+}</string>
+    </property>
     <property name="maximum">
      <number>500</number>
     </property>
     <property name="pageStep">
      <number>1</number>
-    </property>
-    <property name="value">
-     <number>0</number>
     </property>
     <property name="sliderPosition">
      <number>0</number>

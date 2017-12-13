@@ -1,14 +1,37 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "searchwindow.h"
+#include "globalsetting.h"
+#include <QFileInfo>
 #include <QApplication>
 #include <QMessageBox>
 
+void LoadSetting();
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    LoadSetting();
     MainWindow w;
-    //SearchWindow w;
     w.show();
-    //QMessageBox::information(nullptr,"WorkDir", QApplication::applicationDirPath(),QMessageBox::Ok);
     return a.exec();
+}
+
+void LoadSetting()
+{
+    QSettings *SettingFile = new QSettings("Setting.ini", QSettings::IniFormat);
+    GlobalSetting::CacheDir = SettingFile->value("Setting/CacheDir",".\\.Cache\\").toString();
+    GlobalSetting::CommentLimit = SettingFile->value("Setting/CommentLimit",20).toInt();
+    GlobalSetting::SearchLimit=SettingFile->value("Setting/SearchLimit",20).toInt();
+    GlobalSetting::OnlineQuality = SettingFile->value("Setting/OnlineQuality",0).toInt();
+    delete SettingFile;
+    if(!QFileInfo(GlobalSetting::CacheDir).isDir())
+    {
+        auto dir= QDir(GlobalSetting::CacheDir);
+        if(!dir.mkdir(dir.absolutePath()))
+        {
+            QMessageBox::critical(nullptr,u8"Critical Error!",u8"缓存目录不存在且创建失败，退出！");
+            exit(-1);
+        }
+        dir.mkdir("MusicCache");
+        dir.mkdir("PicCache");
+    }
 }

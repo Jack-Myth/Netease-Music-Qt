@@ -8,12 +8,12 @@ QT       += core gui
 QT	+=network
 QT += multimedia
 CONFIG += openssl-linked
-LIBS+=-lWininet
+#LIBS+=-lWininet
+LIBS += -luser32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = NeteaseMusicPlayer
-TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -53,7 +53,9 @@ SOURCES += \
     libQREncode/qrspec.c \
     libQREncode/rscode.c \
     libQREncode/split.c \
-    lrcparser.cpp
+    lrcparser.cpp \
+    commentwindow.cpp \
+    settingdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -80,11 +82,15 @@ HEADERS += \
     mystruct.h \
     searchwindow.h \
     utilitytools.h \
-    lrcparser.h
+    lrcparser.h \
+    commentwindow.h \
+    settingdialog.h
 
 FORMS += \
         mainwindow.ui \
-    searchwindow.ui
+    searchwindow.ui \
+    commentwindow.ui \
+    settingdialog.ui
 
 RESOURCES += \
     Resources/imagereousrce.qrc

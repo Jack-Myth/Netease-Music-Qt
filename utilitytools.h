@@ -11,12 +11,16 @@ class GetPictureFromURL : public QThread
     Q_OBJECT
 private:
     QString UrlString;
+    QNetworkAccessManager* pmanager;
+    bool ShouldAbandon=false;
     std::function<void(QPixmap)> func;
+    QString MD5Hash;
 signals:
     void sendLabel(QPixmap Pixmap);
 public:
     void run() override;
     GetPictureFromURL(QString _UrlString,QObject*,std::function<void(QPixmap)> _func);
+    void Abandon();
 };
 
 namespace UtitlityTools

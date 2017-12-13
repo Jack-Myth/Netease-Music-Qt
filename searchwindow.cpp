@@ -197,6 +197,7 @@ void SearchWindow::on_SearchResult_tabWidget_currentChanged(int index)
 
 void SearchWindow::on_SearchResult_Music_customContextMenuRequested(const QPoint &pos)
 {
+    (void)pos;
     QMenu menu;
     int curRow=ui->SearchResult_Music->currentRow();
     switch(ui->SearchResult_Music->currentColumn())
@@ -223,7 +224,7 @@ void SearchWindow::on_SearchResult_Music_customContextMenuRequested(const QPoint
         QMessageBox::information(nullptr,"emmmmm","假装可以下载",QMessageBox::Ok);
     });
     menu.addMenu(UtitlityTools::ConstructShareMenu(LastSearchResult_Music[curRow]));
-    if(QApplication::arguments().contains("-ShowInfo",Qt::CaseInsensitive))
+    if(QApplication::arguments().contains("-DevMode",Qt::CaseInsensitive))
         menu.addAction(QString::asprintf("%d",LastSearchResult_Music[curRow].ID));
     menu.exec(QCursor::pos());
 }
