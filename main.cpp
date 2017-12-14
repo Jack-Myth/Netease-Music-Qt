@@ -22,6 +22,7 @@ void LoadSetting()
     GlobalSetting::CommentLimit = SettingFile->value("Setting/CommentLimit",20).toInt();
     GlobalSetting::SearchLimit=SettingFile->value("Setting/SearchLimit",20).toInt();
     GlobalSetting::OnlineQuality = SettingFile->value("Setting/OnlineQuality",0).toInt();
+    GlobalSetting::AutoCache = SettingFile->value("Setting/AutoCache",true).toBool();
     delete SettingFile;
     if(!QFileInfo(GlobalSetting::CacheDir).isDir())
     {
@@ -31,7 +32,5 @@ void LoadSetting()
             QMessageBox::critical(nullptr,u8"Critical Error!",u8"缓存目录不存在且创建失败，退出！");
             exit(-1);
         }
-        dir.mkdir("MusicCache");
-        dir.mkdir("PicCache");
     }
 }

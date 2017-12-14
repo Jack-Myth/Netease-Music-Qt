@@ -116,6 +116,12 @@ void CommentWindow::AddComment(QJsonObject JsonObject)
 
 void CommentWindow::GetComment(MusicInfomation Music,int Page)
 {
+    if(!Music.ID)
+    {
+        ui->progressBar->hide();
+        ui->CommentList->clear();
+        return;
+    }
     ui->progressBar->show();
     CurrentPage=Page;
     disconnect(NetworkM,&QNetworkAccessManager::finished,0,0);
@@ -155,6 +161,7 @@ void CommentWindow::GetComment(MusicInfomation Music,int Page)
             ui->PreButton->setEnabled(true);
         else
             ui->PreButton->setEnabled(false);
+        CommentResult->deleteLater();
     },Qt::UniqueConnection);
     NetworkM->get(QNetworkRequest(QString("https://api.imjad.cn/cloudmusic/?type=comments&id=%1&limit=%2&offset=%3").arg(Music.ID).arg(GlobalSetting::CommentLimit).arg(GlobalSetting::CommentLimit*Page)));
 }

@@ -1,9 +1,11 @@
 ﻿#include "utilitytools.h"
 #include "globalsetting.h"
 #include <QDesktopServices>
+#include <QFileDialog>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
+#include <QWidgetAction>
 #include <libQREncode/qrencode.h>
 
 void GetPictureFromURL::run()
@@ -51,6 +53,21 @@ GetPictureFromURL::GetPictureFromURL(QString _UrlString,QObject* target,std::fun
     start();
 }
 
+QPixmap GetPictureFromURL::SearchCache(QString _UrlString)
+{
+    QString MD5Hashs = QString(QCryptographicHash::hash(_UrlString.toLocal8Bit(),QCryptographicHash::Md5).toHex());
+    QFile LocalCache(GlobalSetting::CacheDir+MD5Hashs);
+    if(LocalCache.exists())
+    {
+        LocalCache.open(QIODevice::ReadOnly);
+        QPixmap pixmap;
+        pixmap.loadFromData(LocalCache.readAll());
+        LocalCache.close();
+        return pixmap;
+    }
+    return QPixmap();
+}
+
 void GetPictureFromURL::Abandon()
 {
     ShouldAbandon=true;
@@ -89,12 +106,10 @@ QMenu* UtitlityTools::ConstructShareMenu(MusicInfomation MusicToShare)
         QImage QRPic(QR->width,QR->width,QImage::Format_RGB32);
         for(int x=0;x<QR->width;x++)
             for(int y=0;y<QR->width;y++)
-            {
                 QRPic.setPixel(x,y,QR->data[y*QR->width+x]&1?qRgb(0,0,0):qRgb(255,255,255));
-            }
-        QPixmap p=QPixmap::fromImage(QRPic.scaled(500,500));
-        p.scaledToHeight(100);
-        p.scaledToWidth(100);
+        QPixmap p=QPixmap::fromImage(QRPic.scaled(300,300));
+        //p.scaledToHeight(100);
+        //p.scaledToWidth(100);
         QRView.setIconPixmap(p);
         QRView.setWindowFlags(QRView.windowFlags()&~ Qt::WindowMinMaxButtonsHint);
         QRView.setWindowTitle(u8"用微信“扫一扫”");
@@ -104,8 +119,39 @@ QMenu* UtitlityTools::ConstructShareMenu(MusicInfomation MusicToShare)
         QRView.exec();
         if((void*)QRView.clickedButton()==(void*)button)
         {
-            //QFile::set
+            //QString SelectFilter;
+            QString FilePath= QFileDialog::getSaveFileName(nullptr,u8"选择保存路径",QString(),"JPEG Files(*.jpg);;PNG Files(*.png);;BMP Files(*.bmp);;");
+            if(FilePath!="")
+                QRPic.scaled(500,500).save(FilePath);
         }
     });
     return Shared;
+}
+
+QMenu *UtitlityTools::ConstructPicViewMenu(QPixmap PixmapToShow)
+{
+    QMenu* menu=new QMenu();
+    QWidgetAction* ImageHoldAction=new QWidgetAction(menu);
+    QLabel* ImageHolder;
+    ImageHolder=new QLabel();
+    if(PixmapToShow.height()>500||PixmapToShow.width()>500)
+    {
+        ImageHolder->resize(500,500);
+        ImageHolder->setPixmap(PixmapToShow.scaled(500,500,Qt::KeepAspectRatio,Qt::SmoothTransformation));
+    }
+    else
+    {
+        ImageHolder->resize(PixmapToShow.size());
+        ImageHolder->setPixmap(PixmapToShow);
+    }
+    ImageHoldAction->setDefaultWidget(ImageHolder);
+    //ImageHolder->move(0,0);
+    menu->addActions(QList<QAction*>({ImageHoldAction}));
+    menu->addAction(u8"保存图片",[=]()
+    {
+        QString FilePath= QFileDialog::getSaveFileName(nullptr,u8"选择保存路径",QString(),"JPEG Files(*.jpg);;PNG Files(*.png);;BMP Files(*.bmp);;");
+        if(FilePath!="")
+            PixmapToShow.save(FilePath);
+    });
+    return menu;
 }

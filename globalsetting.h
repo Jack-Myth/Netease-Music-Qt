@@ -11,6 +11,7 @@ namespace GlobalSetting
     extern int SearchLimit;
     extern int CommentLimit;
     extern QString CacheDir;
+    extern bool AutoCache;
 }
 
 #endif // GLOBALSETTING_H

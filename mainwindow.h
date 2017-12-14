@@ -54,6 +54,8 @@ private slots:
 
     void on_SettingWindowButton_clicked();
 
+    void on_MusicAvater_customContextMenuRequested(const QPoint &pos);
+
 signals:
     void WindowMoved();
 private:
@@ -77,7 +79,6 @@ private:
     void onLyricSettingChanged();
     //LRESULT MyWndProc(HWND wnd, UINT message, WPARAM wParam, LPARAM lParam);
     void onWindowMoved();
-    void onBufferStateChanged(int percentFilled);
 };
 
 #endif // MAINWINDOW_H

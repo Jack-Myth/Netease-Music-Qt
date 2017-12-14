@@ -6,4 +6,5 @@ namespace GlobalSetting
     int SearchLimit=20;
     int CommentLimit=20;
     QString CacheDir=".\\.Cache\\";
+    bool AutoCache=true;
 }

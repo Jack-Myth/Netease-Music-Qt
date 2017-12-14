@@ -20,11 +20,13 @@ signals:
 public:
     void run() override;
     GetPictureFromURL(QString _UrlString,QObject*,std::function<void(QPixmap)> _func);
+    static QPixmap SearchCache(QString _UrlString);
     void Abandon();
 };
 
 namespace UtitlityTools
 {
     QMenu* ConstructShareMenu(MusicInfomation MusicToShare);
+    QMenu* ConstructPicViewMenu(QPixmap PixmapToShow);
 }
 #endif // UTILITYTOOLS_H

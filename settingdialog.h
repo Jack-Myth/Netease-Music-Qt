@@ -20,12 +20,19 @@ private slots:
 
     void on_CommentLimit_currentIndexChanged(const QString &arg1);
 
-    void on_CommentLimit_2_currentIndexChanged(int index);
-
     void on_aboutButton_clicked();
+
+    void on_CachePath_editingFinished();
+
+    void on_BrowserCache_clicked();
+
+    void on_Quality_currentIndexChanged(int index);
+
+    void on_Cache_stateChanged(int arg1);
 
 private:
     Ui::SettingDialog *ui;
+    class QSettings *SettingFile=NULL;
 };
 
 #endif // SETTINGDIALOG_H

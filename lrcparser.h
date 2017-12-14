@@ -29,7 +29,7 @@ public:
     QVector<LyricLine> GetLyricData(LyricType Type=LyricType::Origin);
     void ClearLyric();
 private:
-    int PraseLRCString(const QString& LRCString,QVector<LyricLine>& Container);
+    int PraseLRCString(const QString& LRCString, QVector<LRCParser::LyricLine> &Container,bool IsTranslation);
     QVector<LyricLine> LyricOrigin;
     QVector<LyricLine> LyricTranslation;
     QVector<LyricLine> LyricMixed;
