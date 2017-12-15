@@ -28,5 +28,7 @@ namespace UtitlityTools
 {
     QMenu* ConstructShareMenu(MusicInfomation MusicToShare);
     QMenu* ConstructPicViewMenu(QPixmap PixmapToShow);
+    QMenu* ConstructDownloadMenu(MusicInfomation MusicToShare);
+    QString GetValidFileName(QString StrToProcess);
 }
 #endif // UTILITYTOOLS_H

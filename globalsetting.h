@@ -8,9 +8,11 @@
 namespace GlobalSetting
 {
     extern int OnlineQuality;
+    extern int DownloadQuality;
     extern int SearchLimit;
     extern int CommentLimit;
     extern QString CacheDir;
+    extern QString DownloadDir;
     extern bool AutoCache;
 }
 

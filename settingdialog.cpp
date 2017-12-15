@@ -1,7 +1,6 @@
 ﻿#include "settingdialog.h"
 #include "globalsetting.h"
 #include "ui_settingdialog.h"
-
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -17,7 +16,9 @@ SettingDialog::SettingDialog(QWidget *parent) :
     ui->CommentLimit->setCurrentText(QString("%1").arg(GlobalSetting::CommentLimit));
     ui->SearchLimit->setCurrentText(QString("%1").arg(GlobalSetting::SearchLimit));
     ui->Quality->setCurrentIndex(GlobalSetting::OnlineQuality);
+    ui->Quality_Download->setCurrentIndex(GlobalSetting::DownloadQuality);
     ui->CachePath->setText(GlobalSetting::CacheDir);
+    ui->DownloadPath->setText(GlobalSetting::DownloadDir);
     ui->Cache->setChecked(GlobalSetting::AutoCache);
 }
 
@@ -79,8 +80,8 @@ void SettingDialog::on_CachePath_editingFinished()
                 return;
             }
         }
-        GlobalSetting::CacheDir=ui->CachePath->text();
-        SettingFile->setValue("Setting/CacheDir",ui->CachePath->text());
+        GlobalSetting::CacheDir=ui->CachePath->text() + "\\";
+        SettingFile->setValue("Setting/CacheDir",GlobalSetting::CacheDir);
     }
 }
 
@@ -92,7 +93,7 @@ void SettingDialog::on_BrowserCache_clicked()
     {
         if (!CacheDir.mkdir(CacheDir.absolutePath()))
         {
-            QMessageBox::warning(nullptr,u8"Warning",u8"缓存目录不存在且无法创建，此路径不能设置为缓存路径");
+            QMessageBox::warning(nullptr,u8"Warning",u8"目录不存在且无法创建，此路径不能设置为缓存路径");
             ui->CachePath->setText(GlobalSetting::CacheDir);
             return;
         }
@@ -108,4 +109,49 @@ void SettingDialog::on_Cache_stateChanged(int arg1)
         GlobalSetting::AutoCache=ui->Cache->isChecked();
         SettingFile->setValue("Setting/AutoCache",GlobalSetting::AutoCache);
     }
+}
+
+void SettingDialog::on_Quality_Download_currentIndexChanged(int index)
+{
+    if(GlobalSetting::DownloadQuality=index)
+    {
+        GlobalSetting::DownloadQuality=index;
+        SettingFile->setValue("Setting/DownloadQuality",GlobalSetting::OnlineQuality);
+    }
+}
+
+void SettingDialog::on_DownloadPath_editingFinished()
+{
+    if(ui->CachePath->hasFocus())
+    {
+        QDir DownloadDir(ui->DownloadPath->text());
+        if(!DownloadDir.exists())
+        {
+            if (!DownloadDir.mkdir(DownloadDir.absolutePath()))
+            {
+                QMessageBox::warning(nullptr,u8"Warning",u8"目录不存在且无法创建，此路径不能设置为下载路径");
+                ui->DownloadPath->setText(GlobalSetting::DownloadDir);
+                return;
+            }
+        }
+        GlobalSetting::DownloadDir=ui->DownloadPath->text() + "\\";
+        SettingFile->setValue("Setting/DownloadDir",GlobalSetting::DownloadDir);
+    }
+}
+
+void SettingDialog::on_BrowserDownload_clicked()
+{
+    ui->DownloadPath->setText(QFileDialog::getExistingDirectory(nullptr,u8"选择下载目录"));
+    QDir DownloadDir(ui->DownloadPath->text());
+    if(!DownloadDir.exists())
+    {
+        if (!DownloadDir.mkdir(DownloadDir.absolutePath()))
+        {
+            QMessageBox::warning(nullptr,u8"Warning",u8"目录不存在且无法创建，此路径不能设置为下载路径");
+            ui->DownloadPath->setText(GlobalSetting::DownloadDir);
+            return;
+        }
+    }
+    GlobalSetting::DownloadDir=ui->DownloadPath->text()+"\\";
+    SettingFile->setValue("Setting/DownloadDir",GlobalSetting::DownloadDir);
 }

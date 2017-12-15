@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     NetworkMusic=new QNetworkAccessManager();
     NetworkM=new QNetworkAccessManager();
     MyInstance=this;
+    DownloadManagerInstance=new DownloadManager();
     setAttribute(Qt::WA_DeleteOnClose);
     //链接信号和槽
     connect(MusicPlayerCore,&QMediaPlayer::stateChanged,this,&MainWindow::onMusicPlayerStateChanged,Qt::UniqueConnection);
@@ -456,4 +457,16 @@ void MainWindow::on_MusicAvater_customContextMenuRequested(const QPoint &pos)
                 GetPictureFromURL::SearchCache(CurrentMusicInfo.Album.PicURL));
     menu->exec(QCursor::pos());
     delete menu;
+}
+
+void MainWindow::on_Download_Button_customContextMenuRequested(const QPoint &pos)
+{
+    auto menu = UtitlityTools::ConstructDownloadMenu(CurrentMusicInfo);
+    menu->exec(QCursor::pos());
+    delete menu;
+}
+
+DownloadManager* MainWindow::GetDownloadManager()
+{
+    return DownloadManagerInstance;
 }

@@ -19,9 +19,11 @@ void LoadSetting()
 {
     QSettings *SettingFile = new QSettings("Setting.ini", QSettings::IniFormat);
     GlobalSetting::CacheDir = SettingFile->value("Setting/CacheDir",".\\.Cache\\").toString();
+    GlobalSetting::DownloadDir = SettingFile->value("Setting/DownloadDir",".\\Download\\").toString();
     GlobalSetting::CommentLimit = SettingFile->value("Setting/CommentLimit",20).toInt();
     GlobalSetting::SearchLimit=SettingFile->value("Setting/SearchLimit",20).toInt();
-    GlobalSetting::OnlineQuality = SettingFile->value("Setting/OnlineQuality",0).toInt();
+    GlobalSetting::OnlineQuality = SettingFile->value("Setting/OnlineQuality",1).toInt();
+    GlobalSetting::DownloadQuality = SettingFile->value("Setting/DownloadQuality",2).toInt();
     GlobalSetting::AutoCache = SettingFile->value("Setting/AutoCache",true).toBool();
     delete SettingFile;
     if(!QFileInfo(GlobalSetting::CacheDir).isDir())

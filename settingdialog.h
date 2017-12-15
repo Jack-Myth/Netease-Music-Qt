@@ -30,6 +30,12 @@ private slots:
 
     void on_Cache_stateChanged(int arg1);
 
+    void on_Quality_Download_currentIndexChanged(int index);
+
+    void on_DownloadPath_editingFinished();
+
+    void on_BrowserDownload_clicked();
+
 private:
     Ui::SettingDialog *ui;
     class QSettings *SettingFile=NULL;

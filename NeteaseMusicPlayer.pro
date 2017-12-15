@@ -55,7 +55,9 @@ SOURCES += \
     libQREncode/split.c \
     lrcparser.cpp \
     commentwindow.cpp \
-    settingdialog.cpp
+    settingdialog.cpp \
+    downloadwindow.cpp \
+    downloadmanager.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -84,13 +86,16 @@ HEADERS += \
     utilitytools.h \
     lrcparser.h \
     commentwindow.h \
-    settingdialog.h
+    settingdialog.h \
+    downloadwindow.h \
+    downloadmanager.h
 
 FORMS += \
         mainwindow.ui \
     searchwindow.ui \
     commentwindow.ui \
-    settingdialog.ui
+    settingdialog.ui \
+    downloadwindow.ui
 
 RESOURCES += \
     Resources/imagereousrce.qrc

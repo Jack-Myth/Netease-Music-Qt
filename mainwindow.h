@@ -3,6 +3,7 @@
 
 #include "mystruct.h"
 #include "lrcparser.h"
+#include "downloadmanager.h"
 #include <qt_windows.h>
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -29,6 +30,7 @@ public:
     QVector<MusicInfomation> GetMusicInfolist();
     void PlayNext();
     void PlayPre();
+    DownloadManager *GetDownloadManager();
 protected:
     friend LRESULT CALLBACK MainWindow_MyWndProc(HWND wnd,UINT message,WPARAM wParam,LPARAM lParam);
     WNDPROC SuperWndProc;
@@ -56,10 +58,13 @@ private slots:
 
     void on_MusicAvater_customContextMenuRequested(const QPoint &pos);
 
+    void on_Download_Button_customContextMenuRequested(const QPoint &pos);
+
 signals:
     void WindowMoved();
 private:
     MusicInfomation CurrentMusicInfo={0};
+    DownloadManager* DownloadManagerInstance;
     int CurrentMusic=-1;
     QVector<MusicInfomation> MusicCollection;
     Ui::MainWindow *ui;
