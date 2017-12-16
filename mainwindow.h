@@ -31,6 +31,8 @@ public:
     void PlayNext();
     void PlayPre();
     DownloadManager *GetDownloadManager();
+    void BeginCache(MusicInfomation MusicToCache);
+    void RemoveFromPlaylist(MusicInfomation MusicToRemove);
 protected:
     friend LRESULT CALLBACK MainWindow_MyWndProc(HWND wnd,UINT message,WPARAM wParam,LPARAM lParam);
     WNDPROC SuperWndProc;
@@ -59,6 +61,10 @@ private slots:
     void on_MusicAvater_customContextMenuRequested(const QPoint &pos);
 
     void on_Download_Button_customContextMenuRequested(const QPoint &pos);
+
+    void on_Download_Button_clicked();
+
+    void on_PlayList_customContextMenuRequested(const QPoint &pos);
 
 signals:
     void WindowMoved();

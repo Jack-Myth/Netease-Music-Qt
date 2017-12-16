@@ -9,6 +9,13 @@ DownloadWindow::DownloadWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
+    ui->DownloadList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->DownloadList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->DownloadList->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->DownloadList->setColumnWidth(0,240);
+    ui->DownloadList->setColumnWidth(1,150);
+    ui->DownloadList->setColumnWidth(2,150);
+    ui->DownloadList->setColumnWidth(3,50);
     connect(&TimerForUpdate,&QTimer::timeout,this,&DownloadWindow::UpdateDownloadProgress,Qt::UniqueConnection);
     TimerForUpdate.start(1000);
 }
@@ -16,6 +23,7 @@ DownloadWindow::DownloadWindow(QWidget *parent) :
 DownloadWindow::~DownloadWindow()
 {
     delete ui;
+    MyInstance=NULL;
 }
 
 DownloadWindow *DownloadWindow::ShowAndRise()
@@ -37,6 +45,6 @@ void DownloadWindow::UpdateDownloadProgress()
         ui->DownloadList->setItem(i,0,new QTableWidgetItem(DownloadList[i]->MusicInfo.Name));
         ui->DownloadList->setItem(i,1,new QTableWidgetItem(DownloadList[i]->MusicInfo.ArtistsName));
         ui->DownloadList->setItem(i,2,new QTableWidgetItem(DownloadList[i]->MusicInfo.Album.Name));
-        ui->DownloadList->setItem(i,2,new QTableWidgetItem(QString("%1%").arg((int)((float)(DownloadList[i]->Downloaded)/(DownloadList[i]->Size)*1000)/10.f)));
+        ui->DownloadList->setItem(i,3,new QTableWidgetItem(QString("%1%").arg((int)((float)(DownloadList[i]->Downloaded)/(DownloadList[i]->Size)*1000)/10.f)));
     }
 }

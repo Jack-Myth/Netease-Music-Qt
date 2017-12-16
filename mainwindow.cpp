@@ -10,6 +10,7 @@
 #include <QMediaPlaylist>
 #include <QMessageBox>
 #include <QMediaPlayerControl>
+#include <QWidgetItem>
 
 MainWindow* MainWindow::MyInstance=NULL;
 MainWindow::MainWindow(QWidget *parent) :
@@ -292,31 +293,17 @@ void MainWindow::__CheckAndPlayMusic(MusicInfomation MusicToPlay)
         if(LocalFile.exists())
         {
             MusicPlayerCore->setMedia(QMediaContent(QUrl::fromLocalFile(GlobalSetting::CacheDir +Md5Hash)));
+            if(QFile(GlobalSetting::DownloadDir +UtitlityTools::GetValidFileName(MusicToPlay.Name + " - " + MusicToPlay.Artists[0].Name+".mp3")).exists())
+                ui->Download_Button->setText(u8"已下载");
+            else
+                ui->Download_Button->setText(u8"已缓存");
             goto beginPlay;
         }
     }
+    ui->Download_Button->setText(u8"下载");
     MusicPlayerCore->setMedia(QMediaContent(MusicToPlay.URL));
     if(GlobalSetting::AutoCache)
-    {
-        QNetworkReply* MusicReply = NetworkMusic->get(QNetworkRequest(MusicToPlay.URL));
-        connect(MusicReply,&QNetworkReply::finished,this,[=]()
-        {
-            if(MusicReply->error())
-            {
-                qDebug()<< QString("Music Cache Error:") + MusicReply->errorString();
-                return;
-            }
-            QString Md5Hash=QCryptographicHash::hash(
-                        QString("%1%2").arg(MusicToPlay.ID).arg(MusicToPlay.Quality[GlobalSetting::OnlineQuality]).toLocal8Bit(),
-                        QCryptographicHash::Md5).toHex();
-            qDebug()<<GlobalSetting::CacheDir +Md5Hash;
-            QFile Local(GlobalSetting::CacheDir +Md5Hash);
-            Local.open(QIODevice::WriteOnly);
-            Local.write(MusicReply->readAll());
-            Local.close();
-            MusicReply->deleteLater();
-        });
-    }
+        BeginCache(MusicToPlay);
 beginPlay:
     MusicPlayerCore->play();
     if(CommentWindow::MyInstance&&CurrentMusicInfo.ID) //获取评论
@@ -348,18 +335,47 @@ beginPlay:
     NetworkM->get(QNetworkRequest("https://api.imjad.cn/cloudmusic/?type=lyric&id="+QString::asprintf("%d",MusicToPlay.ID)));
 }
 
+void MainWindow::RemoveFromPlaylist(MusicInfomation MusicToRemove)
+{
+    if(MusicCollection.size()==1)
+    {
+        MusicCollection.removeAll(MusicToRemove);
+        CurrentMusic=-1;
+    }
+    else
+    {
+        MusicCollection.removeAll(MusicToRemove);
+        if(MusicToRemove==CurrentMusicInfo)
+        {
+            CurrentMusic-=MusicCollection.size();
+        }
+        else
+        {
+            CurrentMusic=MusicCollection.indexOf(CurrentMusicInfo);
+        }
+    }
+    __UpdatePlaylist();
+}
+
 void MainWindow::__UpdatePlaylist()  //更新播放列表
 {
     ui->PlayList->clear();
     if(MusicCollection.size()<=0)
         return;
-    int i=CurrentMusic<0?CurrentMusic+MusicCollection.size():CurrentMusic;
-    int max=i;
-    do
+    //int i=CurrentMusic<0?CurrentMusic+MusicCollection.size():CurrentMusic;
+    //int max=i;
+    for(int i=0;i<MusicCollection.size();i++)
     {
-        ui->PlayList->addItem(MusicCollection[i].Name);
-        i=(i+1)%MusicCollection.size();
-    }while(i!=max);
+        ui->PlayList->addItem((MusicCollection[i]==CurrentMusicInfo?QString(">"):QString())+MusicCollection[i].Name);
+    }
+//    do
+//    {
+//        auto item =new QListWidgetItem(MusicCollection[i].Name);
+//        ui->PlayList->addItem(item);
+//        item->setData(Qt::UserRole,QVariant::fromValue<MusicInfomation>(MusicCollection[i]));
+//        //item->widget()->setUserData(0,new MusicInfomation(MusicCollection[i]));
+//        i=(i+1)%MusicCollection.size();
+//    }while(i!=max);
 }
 
 MusicInfomation MainWindow::GetCurrentMusic()  //获得当前音乐
@@ -461,6 +477,8 @@ void MainWindow::on_MusicAvater_customContextMenuRequested(const QPoint &pos)
 
 void MainWindow::on_Download_Button_customContextMenuRequested(const QPoint &pos)
 {
+    if(CurrentMusicInfo.ID==0)
+        return;
     auto menu = UtitlityTools::ConstructDownloadMenu(CurrentMusicInfo);
     menu->exec(QCursor::pos());
     delete menu;
@@ -469,4 +487,57 @@ void MainWindow::on_Download_Button_customContextMenuRequested(const QPoint &pos
 DownloadManager* MainWindow::GetDownloadManager()
 {
     return DownloadManagerInstance;
+}
+
+void MainWindow::BeginCache(MusicInfomation MusicToCache)
+{
+    QNetworkReply* MusicReply = NetworkMusic->get(QNetworkRequest(MusicToCache.URL));
+    connect(MusicReply,&QNetworkReply::finished,this,[=]()
+    {
+        if(MusicReply->error())
+        {
+            qDebug()<< QString("Music Cache Error:") + MusicReply->errorString();
+            return;
+        }
+        QString Md5Hash=QCryptographicHash::hash(
+                    QString("%1%2").arg(MusicToCache.ID).arg(MusicToCache.Quality[GlobalSetting::OnlineQuality]).toLocal8Bit(),
+                    QCryptographicHash::Md5).toHex();
+        qDebug()<<GlobalSetting::CacheDir +Md5Hash;
+        QFile Local(GlobalSetting::CacheDir +Md5Hash);
+        Local.open(QIODevice::WriteOnly);
+        Local.write(MusicReply->readAll());
+        Local.close();
+        MusicReply->deleteLater();
+    });
+}
+
+void MainWindow::on_Download_Button_clicked()
+{
+    on_Download_Button_customContextMenuRequested(QPoint(0,0));
+}
+
+void MainWindow::on_PlayList_customContextMenuRequested(const QPoint &pos)
+{
+    if(ui->PlayList->currentRow()<0)
+        return;
+    ui->PlayList->setCurrentRow(ui->PlayList->currentRow());
+    QMenu menu;
+    menu.addAction(u8"立即播放",[=]()
+    {
+       PlayMusic(MusicCollection[ui->PlayList->currentRow()],true);
+    });
+    menu.addAction(u8"下一个播放",[=]()
+    {
+       PlayMusicNext(MusicCollection[ui->PlayList->currentRow()]);
+    });
+    menu.addSeparator();
+    menu.addAction(u8"移除",[=]()
+    {
+        RemoveFromPlaylist(MusicCollection[ui->PlayList->currentRow()]);
+    });
+    menu.addSeparator();
+    auto shareMenu=UtitlityTools::ConstructShareMenu(MusicCollection[ui->PlayList->currentRow()]);
+    //shareMenu->setParent(menu);
+    menu.addMenu(shareMenu);
+    menu.exec(QCursor::pos());
 }

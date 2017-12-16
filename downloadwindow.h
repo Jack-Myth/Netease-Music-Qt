@@ -16,6 +16,8 @@ public:
     ~DownloadWindow();
     static DownloadWindow* ShowAndRise();
     static DownloadWindow* MyInstance;
+private slots:
+
 private:
     explicit DownloadWindow(QWidget *parent = 0);
     QTimer TimerForUpdate;

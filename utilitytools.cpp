@@ -161,57 +161,60 @@ QMenu *UtitlityTools::ConstructPicViewMenu(QPixmap PixmapToShow)
 QMenu *UtitlityTools::ConstructDownloadMenu(MusicInfomation MusicToDownload)
 {
     QMenu* menu=new QMenu();
-    menu->addAction(u8"下载",[=]()
-    {
-        bool IsCacheExist=false;
-        QString CacheFileName;
-        QString TargetFileName=GetValidFileName(MusicToDownload.Name + " - " + MusicToDownload.Artists[0].Name+".mp3");
-        for(int i=MusicToDownload.Quality.size()-1;i>=GlobalSetting::DownloadQuality||i==MusicToDownload.Quality.size()-1;i--)
+    if(QFile(GlobalSetting::DownloadDir +GetValidFileName(MusicToDownload.Name + " - " + MusicToDownload.Artists[0].Name+".mp3")).exists())
+        menu->addAction(u8"已下载")->setEnabled(false);
+    else
+        menu->addAction(u8"下载",[=]()
         {
-            QString MD5Hash=QCryptographicHash::hash(QString("%1%2").arg(MusicToDownload.ID).arg(MusicToDownload.Quality[i]).toLocal8Bit(),QCryptographicHash::Md5).toHex();
-            if(QFile(GlobalSetting::CacheDir+MD5Hash).exists())
+            bool IsCacheExist=false;
+            QString CacheFileName;
+            QString TargetFileName=GetValidFileName(MusicToDownload.Name + " - " + MusicToDownload.Artists[0].Name+".mp3");
+            for(int i=MusicToDownload.Quality.size()-1;i>=GlobalSetting::DownloadQuality||i==MusicToDownload.Quality.size()-1;i--)
             {
-                CacheFileName=MD5Hash;
-                IsCacheExist=true;
-                break;
+                QString MD5Hash=QCryptographicHash::hash(QString("%1%2").arg(MusicToDownload.ID).arg(MusicToDownload.Quality[i]).toLocal8Bit(),QCryptographicHash::Md5).toHex();
+                if(QFile(GlobalSetting::CacheDir+MD5Hash).exists())
+                {
+                    CacheFileName=MD5Hash;
+                    IsCacheExist=true;
+                    break;
+                }
             }
-        }
-        if(IsCacheExist)
-        {
-            QFile::copy(GlobalSetting::CacheDir+CacheFileName,GlobalSetting::DownloadDir+TargetFileName);
-        }
-        else
-        {
-            int TargetQuality=GlobalSetting::DownloadQuality;
-            if(TargetQuality>=MusicToDownload.Quality.size())
-                TargetQuality=MusicToDownload.Quality.size()-1;
-            CacheFileName=QCryptographicHash::hash(QString("%1%2").arg(MusicToDownload.ID).arg(MusicToDownload.Quality[TargetQuality]).toLocal8Bit(),QCryptographicHash::Md5).toHex();
-            QNetworkAccessManager tmpNetworkM;
-            QEventLoop EventHolder;
-            QString url=QString("https://api.imjad.cn/cloudmusic/?type=song&id=")
-                    +QString::asprintf("%d",MusicToDownload.ID)
-                    +QString("&br=")
-                    +QString::asprintf("%d",MusicToDownload.Quality[TargetQuality]);
-            QNetworkReply* tmpNetworkReply=tmpNetworkM.get(QNetworkRequest(url));
-            QTimer Timeout;
-            EventHolder.connect(tmpNetworkReply,&QNetworkReply::finished,&EventHolder,&QEventLoop::quit);
-            EventHolder.connect(&Timeout,&QTimer::timeout,&EventHolder,&QEventLoop::quit);
-            Timeout.start(5000);
-            EventHolder.exec();
-            if(tmpNetworkReply->isFinished())
+            if(IsCacheExist)
             {
-                QJsonObject rootjson=QJsonDocument::fromJson(tmpNetworkReply->readAll()).object();
-                auto url= rootjson.find("data").value().toArray()[0].toObject().find("url").value().toString();
-                MainWindow::MyInstance->GetDownloadManager()->AddToDownload(url,MusicToDownload,CacheFileName,GlobalSetting::DownloadDir+TargetFileName);
-                DownloadWindow::ShowAndRise();
+                QFile::copy(GlobalSetting::CacheDir+CacheFileName,GlobalSetting::DownloadDir+TargetFileName);
             }
             else
             {
-                QMessageBox::warning(NULL,"Error",u8"请求链接超时");
+                int TargetQuality=GlobalSetting::DownloadQuality;
+                if(TargetQuality>=MusicToDownload.Quality.size())
+                    TargetQuality=MusicToDownload.Quality.size()-1;
+                CacheFileName=QCryptographicHash::hash(QString("%1%2").arg(MusicToDownload.ID).arg(MusicToDownload.Quality[TargetQuality]).toLocal8Bit(),QCryptographicHash::Md5).toHex();
+                QNetworkAccessManager tmpNetworkM;
+                QEventLoop EventHolder;
+                QString url=QString("https://api.imjad.cn/cloudmusic/?type=song&id=")
+                        +QString::asprintf("%d",MusicToDownload.ID)
+                        +QString("&br=")
+                        +QString::asprintf("%d",MusicToDownload.Quality[TargetQuality]);
+                QNetworkReply* tmpNetworkReply=tmpNetworkM.get(QNetworkRequest(url));
+                QTimer Timeout;
+                EventHolder.connect(tmpNetworkReply,&QNetworkReply::finished,&EventHolder,&QEventLoop::quit);
+                EventHolder.connect(&Timeout,&QTimer::timeout,&EventHolder,&QEventLoop::quit);
+                Timeout.start(5000);
+                EventHolder.exec();
+                if(tmpNetworkReply->isFinished())
+                {
+                    QJsonObject rootjson=QJsonDocument::fromJson(tmpNetworkReply->readAll()).object();
+                    auto url= rootjson.find("data").value().toArray()[0].toObject().find("url").value().toString();
+                    MainWindow::MyInstance->GetDownloadManager()->AddToDownload(url,MusicToDownload,CacheFileName,GlobalSetting::DownloadDir+TargetFileName);
+                    DownloadWindow::ShowAndRise();
+                }
+                else
+                {
+                    QMessageBox::warning(NULL,"Error",u8"请求链接超时");
+                }
+                tmpNetworkReply->deleteLater();
             }
-            tmpNetworkReply->deleteLater();
-        }
-    });
+        });
     menu->addAction(u8"下载到...",[=]()
     {
         bool IsCacheExist=false;
@@ -283,7 +286,7 @@ QMenu *UtitlityTools::ConstructDownloadMenu(MusicInfomation MusicToDownload)
     }
     else
     {
-        for(int i=MusicToDownload.Quality.size()-1;i>=GlobalSetting::DownloadQuality||i==MusicToDownload.Quality.size()-1;i--)
+        for(int i=MusicToDownload.Quality.size()-1;i>=0||i==MusicToDownload.Quality.size()-1;i--)
         {
             QString MD5Hash=QCryptographicHash::hash(QString("%1%2").arg(MusicToDownload.ID).arg(MusicToDownload.Quality[i]).toLocal8Bit(),QCryptographicHash::Md5).toHex();
             if(QFile(GlobalSetting::CacheDir+MD5Hash).exists())
@@ -292,7 +295,41 @@ QMenu *UtitlityTools::ConstructDownloadMenu(MusicInfomation MusicToDownload)
                 return menu;
             }
         }
-        menu->addAction(u8"缓存(未完成)");
+        menu->addAction(u8"缓存",[=]()
+        {
+            if(MusicToDownload.URL!="")
+                MainWindow::MyInstance->BeginCache(MusicToDownload);
+            else
+            {
+                int TargetQuality=GlobalSetting::DownloadQuality;
+                if(TargetQuality>=MusicToDownload.Quality.size())
+                    TargetQuality=MusicToDownload.Quality.size()-1;
+                QNetworkAccessManager tmpNetworkM;
+                QEventLoop EventHolder;
+                QString url=QString("https://api.imjad.cn/cloudmusic/?type=song&id=")
+                        +QString::asprintf("%d",MusicToDownload.ID)
+                        +QString("&br=")
+                        +QString::asprintf("%d",MusicToDownload.Quality[TargetQuality]);
+                QNetworkReply* tmpNetworkReply=tmpNetworkM.get(QNetworkRequest(url));
+                QTimer Timeout;
+                EventHolder.connect(tmpNetworkReply,&QNetworkReply::finished,&EventHolder,&QEventLoop::quit);
+                EventHolder.connect(&Timeout,&QTimer::timeout,&EventHolder,&QEventLoop::quit);
+                Timeout.start(10000);
+                EventHolder.exec();
+                if(tmpNetworkReply->isFinished())
+                {
+                    QJsonObject rootjson=QJsonDocument::fromJson(tmpNetworkReply->readAll()).object();
+                    MusicInfomation tmpMusicinfo=MusicToDownload;
+                    tmpMusicinfo.URL=rootjson.find("data").value().toArray()[0].toObject().find("url").value().toString();
+                    MainWindow::MyInstance->BeginCache(tmpMusicinfo);
+                }
+                else
+                {
+                    QMessageBox::warning(NULL,"Error",MusicToDownload.Name+ u8"请求链接超时");
+                }
+                tmpNetworkReply->deleteLater();
+            }
+        });
         return menu;
     }
     return menu;
