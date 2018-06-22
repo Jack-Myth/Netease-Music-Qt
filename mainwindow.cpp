@@ -292,6 +292,7 @@ void MainWindow::__CheckAndPlayMusic(MusicInfomation MusicToPlay)
         //MusicPlayerCore->service()->requestControl<QMediaPlayerControl>().setProperty("mediaDownloadEnabled", true);
         if(LocalFile.exists())
         {
+            qDebug()<<(GlobalSetting::CacheDir +Md5Hash);
             MusicPlayerCore->setMedia(QMediaContent(QUrl::fromLocalFile(GlobalSetting::CacheDir +Md5Hash)));
             if(QFile(GlobalSetting::DownloadDir +UtitlityTools::GetValidFileName(MusicToPlay.Name + " - " + MusicToPlay.Artists[0].Name+".mp3")).exists())
                 ui->Download_Button->setText(u8"已下载");

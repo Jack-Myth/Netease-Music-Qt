@@ -73,7 +73,8 @@ int LRCParser::PraseLRCString(const QString& LRCString, QVector<LRCParser::Lyric
                 bool IsOffsetSuccess;
                 int TmpOffset= tmpTagData.mid(7).toInt(&IsOffsetSuccess);
                 if(IsOffsetSuccess)
-                    LRCOffset=TmpOffset;
+                    LRCOffset=-TmpOffset;
+                goto DirectlyContinue;
             }
             else
             {
@@ -162,9 +163,9 @@ bool LRCParser::__GetLyricLineIndex(int Time,int& outLine,const QVector<LyricLin
         FlowCursor=LyricData.size()-2;
         IsChanged=false;
     }
-    if(Time>=LyricData[FlowCursor+1].TimeBegin)
+    if(Time>=LyricData[FlowCursor+1].TimeBegin+LRCOffset)
     {
-        while(LyricData[FlowCursor+1].TimeBegin<Time)
+        while(LyricData[FlowCursor+1].TimeBegin+LRCOffset<Time)
         {
             FlowCursor++;
             if(FlowCursor==LyricData.size()-1)
@@ -172,9 +173,9 @@ bool LRCParser::__GetLyricLineIndex(int Time,int& outLine,const QVector<LyricLin
         }
         outLine= FlowCursor;
         return IsChanged;
-    }else if(Time<LyricData[FlowCursor-1].TimeBegin)
+    }else if(Time<LyricData[FlowCursor-1].TimeBegin+LRCOffset)
     {
-        while(LyricData[FlowCursor-1].TimeBegin>Time)
+        while(LyricData[FlowCursor-1].TimeBegin+LRCOffset>Time)
         {
             FlowCursor--;
             if(FlowCursor<=1)
